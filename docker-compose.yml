@@ -1,0 +1,40 @@
+version: '3.8'
+services:
+  ollama:
+    image: ollama/ollama:latest
+    container_name: ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:11434/api/tags"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    command: >
+      bash -c "ollama serve & sleep 10 && ollama pull mistral && wait"
+    networks:
+      - ollama-network
+
+  wrapper:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: wrapper
+    depends_on:
+      ollama:
+        condition: service_healthy
+    environment:
+      - OLLAMA_API_URL=http://ollama:11434
+      - MODEL=mistral
+    networks:
+      - ollama-network
+
+networks:
+  ollama-network:
+    driver: bridge
+
+volumes:
+  ollama_data:

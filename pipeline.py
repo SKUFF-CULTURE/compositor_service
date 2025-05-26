@@ -69,6 +69,8 @@ class Pipeliner:
     def _audio_mixer(self):
         pass
 
+def run():
+    pass
 
 if __name__ == '__main__':
     pl = Pipeliner()
